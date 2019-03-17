@@ -30,6 +30,9 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import lando.bro.img.dedupe.DHashComputer;
 import lando.bro.img.dedupe.HtmlReportWriter;
 import lando.bro.img.dedupe.Img;
@@ -78,7 +81,7 @@ public final class FindImgDupesApp {
         Path imgDirPath = Paths.get(imgDir),
              reportDirPath = Paths.get(reportDir);
         
-        List<Img> imgs = loadImgs(imgDirPath);
+        List<Img> imgs = loadImgs(imgDirPath, reportDirPath);
         
         Map<String, List<Img>> exactMatches = imgs.stream()
                 .collect(groupingBy(Img::getDigest));
@@ -249,13 +252,21 @@ public final class FindImgDupesApp {
         return matches;
     }
     
-    private List<Img> loadImgs(Path imgDirPath) throws Exception {
+    private List<Img> loadImgs(Path imgDirPath, Path reportDirPath) throws Exception {
+        
+        ObjectMapper jsonMapper = new ObjectMapper();
+        Path dataPath = reportDirPath.resolve("img-matches.json");
+        
+        if( Files.exists(dataPath) ) {
+            logger.info("Reading data from {} instead of loading images. Delete file if you want to read images directly.", dataPath);
+            
+            return jsonMapper.readValue(dataPath.toFile(), new TypeReference<List<Img>>() {});
+        }
         
         logger.info("reading images from {}", imgDirPath);
         
         List<Path> imgPaths =  Files.walk(imgDirPath)
             .filter(p -> Files.isRegularFile(p) && IMG_EXTS.contains(PathUtil.getExt(p)))
-            //.limit(2000)
             .collect(toList());
         
         long totalSize = imgPaths.stream()
@@ -294,6 +305,9 @@ public final class FindImgDupesApp {
                 imgs.size(),
                 Duration.ofMillis(end - start)
                     .toString().toLowerCase());
+        
+        logger.info("Writing data to {}", dataPath);
+        jsonMapper.writeValue(dataPath.toFile(), imgs);
         
         return imgs;
     }

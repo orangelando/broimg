@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream;
 
 import javax.imageio.ImageIO;
 
+import com.mortennobel.imagescaling.MultiStepRescaleOp;
 import com.mortennobel.imagescaling.ResampleOp;
 
 /**
@@ -40,10 +41,17 @@ public final class DHashComputer {
         }
     };
     
+    private final ThreadLocal<MultiStepRescaleOp> fallbackRezizeOps = new ThreadLocal<MultiStepRescaleOp>() {
+        @Override
+        public MultiStepRescaleOp initialValue() {
+            return new MultiStepRescaleOp(W, H);
+        }
+    };
+    
     public ImgInfo forImg(byte[] imgBytes) throws Exception {
         
         BufferedImage img = ImageIO.read(new ByteArrayInputStream(imgBytes));
-        BufferedImage thumb = resizeOps.get().filter(img, null);
+        BufferedImage thumb = createThumb(img);
         
         int[] pixels = getPixels(thumb);
         
@@ -64,6 +72,14 @@ public final class DHashComputer {
         }
         
         return new ImgInfo(img.getWidth(), img.getHeight(), dhash);
+    }
+    
+    private BufferedImage createThumb(BufferedImage img) {
+        if( img.getWidth() > W && img.getHeight() > H ) {
+            return resizeOps.get().filter(img, null);
+        }
+        
+        return fallbackRezizeOps.get().filter(img, null);
     }
     
     private void convertToGrayscale(int[] pixels) {

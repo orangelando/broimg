@@ -16,8 +16,14 @@ public class ScaleRresizeTestApp {
     public static void main(String [] args) throws Exception {
         
         Path p = Paths.get(
-                "/Users/oroman/Desktop/ramp.jpg"
+                "/Users/oroman/Desktop/stuff2/2018/[Windows] Another Metroid 2 Remake [AM2R v14.2 + HQ Soundtrack]/mods/palettes/suits/varia.png"
                 );
+        
+        System.out.println(p);
+        System.out.println("exists: " + Files.exists(p));
+        System.out.println("regular-file: " + Files.isRegularFile(p));
+        System.out.println("readable: " + Files.isReadable(p));
+        System.out.println("size: " + Files.size(p));
         
         BufferedImage img = ImageIO.read(p.toFile());
         
