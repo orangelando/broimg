@@ -33,12 +33,17 @@ public final class DHashComputer {
     private static final int W = 9;
     private static final int H = 8;
     
-    private final ResampleOp resizeOp = new ResampleOp(W, H);
-
+    private final ThreadLocal<ResampleOp> resizeOps = new ThreadLocal<ResampleOp>() {
+        @Override
+        public ResampleOp initialValue() {
+            return new ResampleOp(W, H);
+        }
+    };
+    
     public ImgInfo forImg(byte[] imgBytes) throws Exception {
         
         BufferedImage img = ImageIO.read(new ByteArrayInputStream(imgBytes));
-        BufferedImage thumb = resizeOp.filter(img, null);
+        BufferedImage thumb = resizeOps.get().filter(img, null);
         
         int[] pixels = getPixels(thumb);
         

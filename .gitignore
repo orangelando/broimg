@@ -6,3 +6,4 @@
 /bin/
 /target/
 /release/
+.DS_Store
