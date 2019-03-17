@@ -23,8 +23,10 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
+import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +55,14 @@ public final class FindImgDupesApp {
         FindImgDupesApp app = new FindImgDupesApp();
         CmdLineParser parser = new CmdLineParser(app);
         
-        parser.parseArgument(args);
+        try {
+            parser.parseArgument(args);
+        } catch(CmdLineException e) {
+            //this doesn't print anything... who knows why
+            //parser.printUsage(System.err);
+            System.err.println("Usage: -imgDir <path> -reportDir <path>");
+            System.exit(1);
+        }
         
         app.exec();
     }
