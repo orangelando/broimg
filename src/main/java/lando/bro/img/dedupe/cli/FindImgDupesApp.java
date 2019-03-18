@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 import lando.bro.img.dedupe.DHashComputer;
 import lando.bro.img.dedupe.FileTrasher;
@@ -68,7 +69,8 @@ public final class FindImgDupesApp {
         } catch(CmdLineException e) {
             //this doesn't print anything... who knows why
             //parser.printUsage(System.err);
-            System.err.println("Usage: -imgDir <path> -reportDir <path>");
+            System.err.println(e.getMessage());
+            System.err.println("Usage: -imgDir <path> -reportDir <path> [-exactMatchesDir <path>]");
             System.exit(1);
         }
         
@@ -263,6 +265,9 @@ public final class FindImgDupesApp {
     private List<Img> loadImgs(Path imgDirPath, Path reportDirPath) throws Exception {
         
         ObjectMapper jsonMapper = new ObjectMapper();
+        
+        jsonMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        
         Path dataPath = reportDirPath.resolve("img-matches.json");
         
         if( Files.exists(dataPath) ) {
