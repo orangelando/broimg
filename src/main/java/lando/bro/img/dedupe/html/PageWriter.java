@@ -1,4 +1,4 @@
-package lando.bro.img.dedupe.cli.html;
+package lando.bro.img.dedupe.html;
 
 import java.io.PrintWriter;
 import java.util.List;

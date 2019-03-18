@@ -37,7 +37,7 @@ import lando.bro.img.dedupe.ImgSortEntry;
 import lando.bro.img.dedupe.MatchGroup;
 import lando.bro.img.dedupe.PathUtil;
 import lando.bro.img.dedupe.SimilarMatchingPair;
-import lando.bro.img.dedupe.cli.html.HtmlReportWriter;
+import lando.bro.img.dedupe.html.HtmlReportWriter;
 
 public final class FindImgDupesApp {
     
