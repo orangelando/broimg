@@ -1,6 +1,10 @@
 # Photo duplicate finder
 
-Project that finds exact matches and similar images in a dir.
+Project that finds exact matches and similar images in a dir. Exact matches are
+files with matching md5 checksums. Similar matches are those where the hamming
+distance of an 8x8 dhash is less than 2. More info on dhashes here:
+
+ * http://www.hackerfactor.com/blog/?/archives/529-Kind-of-Like-That.html
 
 ## Usage
 
