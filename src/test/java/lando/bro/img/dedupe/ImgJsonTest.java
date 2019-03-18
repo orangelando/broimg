@@ -77,8 +77,5 @@ public class ImgJsonTest {
         String json2 = jsonCreator.writeValueAsString(list2);
         
         assertTrue( json.equals(json2));
-        
-        
-        
     }
 }

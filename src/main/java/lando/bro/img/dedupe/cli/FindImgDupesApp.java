@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.kohsuke.args4j.CmdLineException;
@@ -31,6 +32,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lando.bro.img.dedupe.DHashComputer;
+import lando.bro.img.dedupe.FileTrasher;
 import lando.bro.img.dedupe.Img;
 import lando.bro.img.dedupe.ImgLoader;
 import lando.bro.img.dedupe.ImgSortEntry;
@@ -52,6 +54,9 @@ public final class FindImgDupesApp {
     
     @Option(name="-matchesPerPage", required=false)
     private int matchesPerPage = 500;
+    
+    @Option(name="-exactMatchesDir", required=false)
+    private String exactMatchesDir = null;
 
     public static void main(String [] args) throws Exception {
                 
@@ -112,7 +117,24 @@ public final class FindImgDupesApp {
         new HtmlReportWriter()
             .write(reportDirPath, matchesPerPage, matchGroups);
         
+        if( exactMatchesDir != null ) {
+            trashExactMatches(matchGroups);
+        }
+        
         logger.info("done");
+    }
+    
+    private void trashExactMatches(List<MatchGroup> matchGroups) throws Exception {
+        Path exactMatchesDirPath = Paths.get(exactMatchesDir);
+        logger.info("moving exact matches to {}", exactMatchesDirPath);
+        
+        FileTrasher trasher = new FileTrasher(exactMatchesDirPath);
+        
+        for(MatchGroup group: matchGroups) {
+            for(Img img: group.getExactMatches()) {
+                trasher.trashFile(img.getPath());
+            }
+        }
     }
     
     private List<MatchGroup> buildMatchGroups(
@@ -246,7 +268,17 @@ public final class FindImgDupesApp {
         if( Files.exists(dataPath) ) {
             logger.info("Reading data from {} instead of loading images. Delete file if you want to read images directly.", dataPath);
             
-            return jsonMapper.readValue(dataPath.toFile(), new TypeReference<List<Img>>() {});
+            List<Img> list = jsonMapper.readValue(
+                    dataPath.toFile(), 
+                    new TypeReference<List<Img>>() {});
+            
+            //some of these files might have been deleted or moved
+            //since we last loaded.
+            list = list.stream()
+                    .filter(img -> Files.exists(img.getPath()))
+                    .collect(Collectors.toList());
+            
+            return list;
         }
         
         logger.info("reading images from {}", imgDirPath);
