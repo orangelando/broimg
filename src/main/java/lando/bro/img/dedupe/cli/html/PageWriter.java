@@ -1,23 +1,23 @@
-package lando.bro.img.dedupe;
+package lando.bro.img.dedupe.cli.html;
 
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * I should probably be using a templating library...
- */
-public final class HtmlReportWriter {
+import lando.bro.img.dedupe.Img;
+import lando.bro.img.dedupe.MatchGroup;
 
+final class PageWriter {
+    
     private final PrintWriter out;
     private final List<MatchGroup> matches;
-    
-    public HtmlReportWriter(PrintWriter out, List<MatchGroup> matches) {
+
+    PageWriter(PrintWriter out, List<MatchGroup> matches) {
         this.out = Objects.requireNonNull(out);
         this.matches = Objects.requireNonNull(matches);
     }
-    
-    public void write() throws Exception {
+        
+    void write() throws Exception {
         o("<html>");
         o("<!doctype html>");
         

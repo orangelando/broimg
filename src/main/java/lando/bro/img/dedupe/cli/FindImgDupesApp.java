@@ -4,9 +4,6 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 
-import java.io.BufferedWriter;
-import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -34,13 +31,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lando.bro.img.dedupe.DHashComputer;
-import lando.bro.img.dedupe.HtmlReportWriter;
 import lando.bro.img.dedupe.Img;
 import lando.bro.img.dedupe.ImgLoader;
 import lando.bro.img.dedupe.ImgSortEntry;
 import lando.bro.img.dedupe.MatchGroup;
 import lando.bro.img.dedupe.PathUtil;
 import lando.bro.img.dedupe.SimilarMatchingPair;
+import lando.bro.img.dedupe.cli.html.HtmlReportWriter;
 
 public final class FindImgDupesApp {
     
@@ -52,6 +49,9 @@ public final class FindImgDupesApp {
     
     @Option(name="-reportDir", required=true)
     private String reportDir;
+    
+    @Option(name="-matchesPerPage", required=false)
+    private int matchesPerPage = 500;
 
     public static void main(String [] args) throws Exception {
                 
@@ -108,25 +108,11 @@ public final class FindImgDupesApp {
         List<MatchGroup> matchGroups = buildMatchGroups(imgs, exactMatches, similarMatches);
                 
         logger.info("match-groups {}", matchGroups.size());
-        logger.info("left over digest-groups {}", exactMatches.size());
-        logger.info("left over similar-matches {}", similarMatches.size());
         
-        writeReport(reportDirPath, matchGroups);
+        new HtmlReportWriter()
+            .write(reportDirPath, matchesPerPage, matchGroups);
         
         logger.info("done");
-    }
-    
-    private void writeReport(Path reportDir, List<MatchGroup> matches) throws Exception {
-        Path reportPath = reportDir.resolve("img-matches.html");
-        
-        logger.info("writing report to {}", reportPath);
-        
-        try(BufferedWriter bout = Files.newBufferedWriter(reportPath, StandardCharsets.UTF_8);
-            PrintWriter pout = new PrintWriter(bout)) {
-            
-            new HtmlReportWriter(pout, matches)
-                .write();
-        }
     }
     
     private List<MatchGroup> buildMatchGroups(
