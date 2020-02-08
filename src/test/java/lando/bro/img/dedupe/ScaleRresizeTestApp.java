@@ -6,6 +6,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 
@@ -14,49 +17,55 @@ import com.mortennobel.imagescaling.MultiStepRescaleOp;
 public class ScaleRresizeTestApp {
 
     public static void main(String [] args) throws Exception {
+       
         
-        Path p = Paths.get(
-                "/Users/oroman/Desktop/stuff2/2018/[Windows] Another Metroid 2 Remake [AM2R v14.2 + HQ Soundtrack]/mods/palettes/suits/varia.png"
-                );
+        List<Path> paths = Arrays.asList(
+                "/Users/oroman/Downloads/20170506_195352181_iOS.jpg",
+                "/Users/oroman/Downloads/Christian Cross.jpg"
+                ).stream().map(s -> Paths.get(s)).collect(Collectors.toList());
         
-        System.out.println(p);
-        System.out.println("exists: " + Files.exists(p));
-        System.out.println("regular-file: " + Files.isRegularFile(p));
-        System.out.println("readable: " + Files.isReadable(p));
-        System.out.println("size: " + Files.size(p));
+        int index = 0;
         
-        BufferedImage img = ImageIO.read(p.toFile());
+        for(Path p: paths) {
         
-        
-        int newWidth = 9;
-        int newHeight = 8;
-        
-        MultiStepRescaleOp resizeOp = new MultiStepRescaleOp(newWidth, newHeight);
-        long start = System.currentTimeMillis();
-        BufferedImage resizedImage = resizeOp.filter(img, null);
-        long end = System.currentTimeMillis();
-        
-        System.out.println("resize: " + Duration.ofMillis(end - start));
-        
-        int[] pixels = getPixels(resizedImage);
-        
-        System.out.println("pixels: " + pixels.length);
-
-                
-        ImageIO.write(
-                resizedImage, 
-                "jpg", 
-                new File("/Users/oroman/Desktop/thumb.jpg"));
-        
-        byte[] bytes = Files.readAllBytes(p);
-        
-        DHashComputer dhasher = new DHashComputer();
-        
-        long dhash = dhasher.forImg(bytes).dhash;
-        
-        System.out.println(Long.toBinaryString(dhash));
-        
-        System.out.println(DHashComputer.dhashASCII(dhash));
+            System.out.println(p);
+            System.out.println("exists: " + Files.exists(p));
+            System.out.println("regular-file: " + Files.isRegularFile(p));
+            System.out.println("readable: " + Files.isReadable(p));
+            System.out.println("size: " + Files.size(p));
+            
+            BufferedImage img = ImageIO.read(p.toFile());
+            
+            int newWidth = 9;
+            int newHeight = 8;
+            
+            MultiStepRescaleOp resizeOp = new MultiStepRescaleOp(newWidth, newHeight);
+            long start = System.currentTimeMillis();
+            BufferedImage resizedImage = resizeOp.filter(img, null);
+            long end = System.currentTimeMillis();
+            
+            System.out.println("resize: " + Duration.ofMillis(end - start));
+            
+            int[] pixels = getPixels(resizedImage);
+            
+            System.out.println("pixels: " + pixels.length);
+    
+                    
+            ImageIO.write(
+                    resizedImage, 
+                    "png", 
+                    new File("/Users/oroman/Desktop/thumb"+(index++)+".png"));
+            
+            byte[] bytes = Files.readAllBytes(p);
+            
+            DHashComputer dhasher = new DHashComputer();
+            
+            long dhash = dhasher.forImg(bytes).dhash;
+            
+            System.out.println(Long.toBinaryString(dhash));
+            
+            System.out.println(DHashComputer.dhashASCII(dhash));
+        }
         
         System.out.println("done");
     }

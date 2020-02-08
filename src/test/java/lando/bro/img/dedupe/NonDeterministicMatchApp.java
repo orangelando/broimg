@@ -1,7 +1,6 @@
 package lando.bro.img.dedupe;
 
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.PrintStream;
 import java.nio.file.Files;
@@ -12,9 +11,7 @@ import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 
-import com.mortennobel.imagescaling.MultiStepRescaleOp;
 import com.mortennobel.imagescaling.ThumbnailRescaleOp;
-
 
 public class NonDeterministicMatchApp {
 
